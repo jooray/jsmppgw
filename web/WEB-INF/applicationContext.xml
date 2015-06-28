@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <context:annotation-config/>
+    <context:mbean-export/>
+         
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          p:location="/WEB-INF/jsmpp.properties" />
+
+    <bean id="smppbean" class="com.digmia.jsmppgw.SMPPBean"
+          p:hostname="${smpp.hostname}"
+          p:port="${smpp.port}"
+          p:username="${smpp.username}"
+          p:password="${smpp.password}"
+          p:longNumber="${smpp.longnumber}"
+          p:alphanumericNumber="${smpp.alphanumericnumber}"
+          p:maxRetransmits="${smpp.maxretransmits}"
+          p:smppConnectTimeout="${smpp.smppconnecttimeout}"
+          p:messageRetryRate="${smpp.messageretryrate}"
+          p:messageSendingRate="${smpp.messagesendingrate}"
+
+
+    >
+        <property name="messageListenerContainer" ref="jmsContainer"/>
+        <property name="jmsDestination" ref="myDestination"/>
+        <property name="incomingQueue" ref="incomingQueue"/>
+        <property name="jmsSenderTemplate" ref="jmsSenderTemplate"/>
+        </bean>
+
+
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="false"/>
+        <property name="connectionFactory" ref="myConnectionFactory"/>
+        <property name="destination" ref="myDestination"/>
+        <property name="messageListener" ref="smppbean"/>
+        <property name="acceptMessagesWhileStopping" value="false"/>
+        <property name="sessionTransacted" value="true"/>
+
+    </bean>
+
+    <bean id="jmsSenderTemplate" class="org.springframework.jms.core.JmsTemplate">
+         <property name="connectionFactory">
+          <ref local="myConnectionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="myDestination" class="org.apache.activemq.command.ActiveMQQueue">
+            <constructor-arg value="${activemq.queue}"/>
+    </bean>
+
+    <bean id="incomingQueue" class="org.apache.activemq.command.ActiveMQQueue">
+            <constructor-arg value="${activemq.incomingqueue}"/>
+    </bean>
+
+
+    <bean id="myConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+          <property name="brokerURL" value="${activemq.brokerurl}"/>
+    </bean>
+
+
+
+    
+</beans>

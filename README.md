@@ -2,6 +2,11 @@
 
 The basic usecase: your SMS operator wants you to send and receive SMS messages (usually in bulk) through SMPP, but you want simpler and more standard way to do it.
 
+Warning
+=======
+
+This software is no longer maintained. The value is if you want to understand how to compose SMPP messages, do not use it in production, it will probably not work anymore.
+
 Features
 ========
 
